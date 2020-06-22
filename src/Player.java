@@ -1,8 +1,8 @@
+import javafx.scene.canvas.GraphicsContext;
+
 public class Player extends Sprite {
-    public Player() {
-        super("resources\\img\\idle.png");
-        boundingBorderOffsetLeftX = 48;
-        boundingBorderOffsetRightX = 50;
+    public Player(int x, int y, GraphicsContext gc) {
+        super("resources\\img\\idle.png", 0, x, y, gc);
     }
 
     public void Shoot(DIRECTION dir) {

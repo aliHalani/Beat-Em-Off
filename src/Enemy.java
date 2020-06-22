@@ -1,16 +1,13 @@
+import javafx.scene.canvas.GraphicsContext;
+
 import java.util.Random;
 
 public class Enemy extends Sprite {
-    public Enemy(String imgPath) {
-        super("resources\\img\\enemy.png");
-        boundingBorderOffsetLeftX = 20;
-//        currentDirection = DIRECTION.values()[new Random().nextInt(DIRECTION.values().length)];
-        currentDirection = DIRECTION.LEFT;
+    public Enemy(int speed, int x, int y, GraphicsContext gc, DIRECTION dir) {
+        super("resources\\img\\enemy.png", speed, x, y, gc);
 
-        if (currentDirection == DIRECTION.LEFT) {
-            imgView.setTranslateX(1600);
-        } else {
-            imgView.setScaleX(-1);
-        }
+//        if (dir == DIRECTION.LEFT) {
+//            img
+//        }
     }
 }
