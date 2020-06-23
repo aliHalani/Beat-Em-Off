@@ -1,3 +1,4 @@
+import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -32,11 +33,14 @@ public abstract class Sprite {
         this.speed = speed;
         this.x = (int) (x - (img.getWidth() / 2));
         this.y = y;
+        this.boundingBorderOffsetLeftX = boundingBorderOffsetLeftX;
+        this.boundingBorderOffsetRightX = boundingBorderOffsetRightX;
         this.currentDirection = dir;
         this.parent = parent;
 
         this.boundingBox = new Rectangle(0 + boundingBorderOffsetLeftX, 0,
-                                        this.img.getWidth() - boundingBorderOffsetRightX, this.img.getHeight());
+                                        this.img.getWidth() - boundingBorderOffsetRightX - boundingBorderOffsetLeftX,
+                                            this.img.getHeight());
         this.boundingBox.setStyle(("-fx-fill: transparent; -fx-stroke: black; -fx-stroke-width: 1;"));
 
         imgView.setTranslateX(x);
@@ -59,6 +63,17 @@ public abstract class Sprite {
         boundingBox.setTranslateY(y);
     }
 
+    protected void switchDirections(DIRECTION dir) {
+        if (dir != currentDirection) {
+            currentDirection = dir;
+
+            imgView.setScaleX(imgView.getScaleX() * -1);
+
+            boundingBox.setTranslateX(boundingBox.getTranslateX() +
+                    ((boundingBorderOffsetRightX - boundingBorderOffsetLeftX) * -imgView.getScaleX()));
+        }
+    }
+
     public void moveToCenter() {
         if (currentDirection == DIRECTION.LEFT) {
             x -= speed;
@@ -75,5 +90,9 @@ public abstract class Sprite {
 
     public Boolean collision(Sprite opp) {
         return boundingBox.getBoundsInParent().intersects(opp.boundingBox.getBoundsInParent());
+    }
+
+    public Boolean collision(Bounds opp) {
+        return boundingBox.getBoundsInParent().intersects(opp);
     }
 }
