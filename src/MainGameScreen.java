@@ -22,19 +22,17 @@ import java.util.Random;
 public class MainGameScreen implements GameScreen {
     final MiniGame parent;
     ArrayList<Enemy> enemies = new ArrayList<Enemy>();
-    final int enemySpeed = 7;
+    final int enemySpeed = 2;
     final long enemyCreationSpeed = 2;
     final int GAME_LANE_OFFSET = 300;
-    Group root = new Group();
+    Pane root = new Pane();
 
     public MainGameScreen(int SC_WIDTH, int SC_HEIGHT, MiniGame pnode) {
         parent = pnode;
+        root.setPrefWidth(SC_WIDTH);
+        root.setPrefHeight(SC_HEIGHT);
 
-        Canvas canvas = new Canvas(SC_WIDTH, SC_HEIGHT);
-        root.getChildren().add(canvas);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-
-        Player player = new Player(SC_WIDTH / 2, GAME_LANE_OFFSET, gc);
+        Player player = new Player(SC_WIDTH / 2, GAME_LANE_OFFSET, root);
         player.Draw();
 
                 AnimationTimer animationTimer = new AnimationTimer() {
@@ -46,12 +44,12 @@ public class MainGameScreen implements GameScreen {
 
                 for (Enemy enemy : enemies) {
                     enemy.moveToCenter();
-//                    if (player.getBoundingBox().intersects(enemy.getBoundingBox().getLayoutBounds())) {
-//                        System.out.println("Collision");
-//                    }
+                    if (player.collision(enemy)) {
+                        System.out.println("Collision");
+                    }
                 }
 
-                if ((l - lastEnemyCreatedTime) > enemyCreationSpeed * 1000 * 1000 * 1000 & enemies.size() < 5) {
+                if ((l - lastEnemyCreatedTime) > enemyCreationSpeed * 1000 * 1000 * 1000 & enemies.size() < 1) {
                     Sprite.DIRECTION dir = Sprite.DIRECTION.values()[new Random().nextInt(Sprite.DIRECTION.values().length)];
                     int enemyX;
                     if (dir == Sprite.DIRECTION.LEFT) {
@@ -60,7 +58,7 @@ public class MainGameScreen implements GameScreen {
                         enemyX = -300;
                     }
 
-                    Enemy enemy = new Enemy(enemySpeed, enemyX, GAME_LANE_OFFSET, gc, dir);
+                    Enemy enemy = new Enemy(enemySpeed, enemyX, GAME_LANE_OFFSET, dir, root);
                     enemies.add(enemy);
                     lastEnemyCreatedTime = l;
                     System.out.println("Created new enemy");
