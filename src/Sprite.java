@@ -11,7 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public abstract class Sprite {
-    int x,y = 0;
+    double x,y = 0;
     Image img;
     BorderPane imgView;
     DIRECTION currentDirection = DIRECTION.LEFT;
