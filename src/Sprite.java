@@ -17,7 +17,7 @@ public abstract class Sprite {
     DIRECTION currentDirection = DIRECTION.LEFT;
     int boundingBorderOffsetLeftX;
     int boundingBorderOffsetRightX;
-    final int speed;
+    final double speed;
     Rectangle boundingBox;
     Pane parent;
 
@@ -26,7 +26,7 @@ public abstract class Sprite {
         RIGHT
     }
 
-    public Sprite(String imgPath, int speed, int x, int y, int boundingBorderOffsetLeftX, int boundingBorderOffsetRightX, DIRECTION dir, Pane parent) {
+    public Sprite(String imgPath, double speed, int x, int y, int boundingBorderOffsetLeftX, int boundingBorderOffsetRightX, DIRECTION dir, Pane parent) {
         img = new Image(imgPath);
         imgView = new BorderPane( new ImageView(img));
 
@@ -41,7 +41,7 @@ public abstract class Sprite {
         this.boundingBox = new Rectangle(0 + boundingBorderOffsetLeftX, 0,
                                         this.img.getWidth() - boundingBorderOffsetRightX - boundingBorderOffsetLeftX,
                                             this.img.getHeight());
-        this.boundingBox.setStyle(("-fx-fill: transparent; -fx-stroke: black; -fx-stroke-width: 1;"));
+        this.boundingBox.setStyle(("-fx-fill: transparent; -fx-stroke: black; -fx-stroke-width: 0;"));
 
         imgView.setTranslateX(x);
         imgView.setTranslateY(y);

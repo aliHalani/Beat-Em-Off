@@ -1,13 +1,12 @@
 import javafx.animation.Animation;
-import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
-import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.CacheHint;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
@@ -16,46 +15,51 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
 import javafx.util.Duration;
 
-
-public class TitleScreen implements GameScreen {
+public class LoseGameScreen implements GameScreen {
+    final String gameTitle = "You lose";
     final int titlePadding = 30;
     final int titleYOffset = 30;
     final int titleBorderSize = 2;
     final int titleBorderWidth = 30;
     final int titleBorderHeight = 25;
     final int titleFontSize = 56;
-    final int controlYOffset = 85;
-    final int controlFontSize = 32;
+    final int scoreYOffset = 160;
     final Color titleBackgroundColour = Color.INDIANRED;
     final Paint titleBackgroundBorderColour = Color.DARKRED;
-    static StackPane root;
-    static Node titleBar;
-    static Node controls;
-    final MiniGame parent;
+    Pane root = new Pane();
+    MiniGame parent;
 
-    public TitleScreen(String gameTitle, int SC_WIDTH, int SC_HEIGHT, MiniGame pnode) {
-        parent = pnode;
+    LoseGameScreen(GameInfo gameInfo, int SC_WIDTH, int SC_HEIGHT, MiniGame parent) {
+        this.parent = parent;
 
-        // set window properties
-        root = new StackPane();
-        root.setPrefSize(SC_WIDTH, SC_HEIGHT);
+        root.setPrefWidth(SC_WIDTH);
+        root.setPrefHeight(SC_HEIGHT);
         root.setFocusTraversable(true);
 
-        // add title bar to title screen
-        titleBar = titleBar(gameTitle);
-        root.getChildren().add(titleBar);
-        root.setAlignment(titleBar, Pos.TOP_CENTER);
-        root.setMargin(titleBar, new Insets(titleYOffset, 0, 0, 0));
+        Rectangle backgroundRect = new Rectangle(SC_WIDTH, SC_HEIGHT, Color.BLACK);
+        backgroundRect.setOpacity(0.65);
+        root.getChildren().add(backgroundRect);
 
-        // add controls to title screen
-        controls = controls();
-        root.getChildren().add(controls);
-        root.setAlignment(controls, Pos.BOTTOM_CENTER);
-        root.setMargin(controls, new Insets(0,0,  controlYOffset, 0));
+        StackPane contentRoot = new StackPane();
+        contentRoot.setPrefWidth(SC_WIDTH);
+        contentRoot.setPrefHeight(SC_HEIGHT);
+        root.getChildren().add(contentRoot);
+
+        gameInfo.score.set(35);
+
+        Node titleWrapper = titleBar("You lose");
+        contentRoot.getChildren().add(titleWrapper);
+        contentRoot.setAlignment(titleWrapper, Pos.TOP_CENTER);
+        contentRoot.setMargin(titleWrapper, new Insets(titleYOffset, 0, 0, 0));
+
+        Node scoreContent = scoreDisplay(gameInfo);
+        contentRoot.getChildren().add(scoreContent);
+        contentRoot.setAlignment(scoreContent, Pos.CENTER);
+        contentRoot.setMargin((scoreContent), new Insets(0, 0, scoreYOffset, 0));
+
     }
 
-    private Node titleBar (String gameTitle) {
-        Group titleWrapper = new Group();
+    private Node titleBar(String contentTitle) {
         StackPane titlePane = new StackPane();
 
         Text title = new Text(gameTitle);
@@ -64,7 +68,7 @@ public class TitleScreen implements GameScreen {
         title.setFill(Color.WHITE);
 
         Rectangle titleBackground = new Rectangle(title.getLayoutBounds().getWidth() + titlePadding,
-                                                 title.getLayoutBounds().getHeight() + titlePadding);
+                title.getLayoutBounds().getHeight() + titlePadding);
         titleBackground.setFill(titleBackgroundColour);
         titleBackground.setArcWidth(titleBorderWidth);
         titleBackground.setArcHeight(titleBorderHeight);
@@ -72,9 +76,25 @@ public class TitleScreen implements GameScreen {
         titleBackground.setStrokeWidth(titleBorderSize);
 
         titlePane.getChildren().addAll(titleBackground, title);
-        titleWrapper.getChildren().add(titlePane);
 
-        return titleWrapper;
+        return new Group(titlePane);
+    }
+
+    private Node scoreDisplay(GameInfo gameInfo) {
+        VBox root = new VBox();
+        root.setAlignment(Pos.CENTER);
+
+        Text scoreLabel = new Text("Score");
+        scoreLabel.setFont(parent.getGameFont(36));
+        scoreLabel.setFill(Color.WHITE);
+        root.getChildren().add(scoreLabel);
+
+        Text score = new Text(gameInfo.score.getValue().toString());
+        score.setFont(new Font("Verdana", 30));
+        score.setFill(Color.WHITE);
+        root.getChildren().add(score);
+
+        return new Group(root);
     }
 
     private Node controls() {
@@ -128,35 +148,8 @@ public class TitleScreen implements GameScreen {
         return controlsWrapper;
     }
 
-    public void startGameTransition() {
-        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), root);
-        fadeTransition.setFromValue(1);
-        fadeTransition.setToValue(0);
-        fadeTransition.setOnFinished(parent.startGame());
-
-        TranslateTransition titleTranslateTransition = new TranslateTransition(Duration.seconds(1.2), titleBar);
-        titleTranslateTransition.setFromY(0);
-        titleTranslateTransition.setToY(-170);
-
-        TranslateTransition controlsTranslateTransition = new TranslateTransition(Duration.seconds(1.2), controls);
-        controlsTranslateTransition.setFromY(0);
-        controlsTranslateTransition.setToY(320);
-
-        fadeTransition.play();
-        titleTranslateTransition.play();
-        controlsTranslateTransition.play();
-    }
-
     public Parent getRoot() {
-        root.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) {
-                startGameTransition();
-                root.setOnKeyPressed(null);
-            } else if (e.getCode() == KeyCode.E) {
-                System.exit(0);
-            }
-        });
-
         return root;
     }
+
 }

@@ -14,6 +14,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import jdk.jshell.spi.ExecutionEnv;
 
 import java.sql.Time;
@@ -21,17 +24,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
-public class MainGameScreen implements GameScreen {
+public class Level implements GameScreen {
     final MiniGame parent;
     ArrayList<Enemy> enemies = new ArrayList<Enemy>();
-    int enemySpeed = 2;
-    final long enemyCreationSpeed = 2;
+    final double enemyCreationSpeed = 1.2;
     final int fireballSpeed = 2;
-    final int fireballLength = 2;
     final int GAME_LANE_OFFSET = 300;
     Pane root = new Pane();
+    GameInfo gameInfo;
 
-    public MainGameScreen(int SC_WIDTH, int SC_HEIGHT, MiniGame pnode) {
+    public Level(int SC_WIDTH, int SC_HEIGHT, GameInfo gameInfo, MiniGame pnode) {
+        this.gameInfo = gameInfo;
         parent = pnode;
         root.setPrefWidth(SC_WIDTH);
         root.setPrefHeight(SC_HEIGHT);
@@ -41,7 +44,6 @@ public class MainGameScreen implements GameScreen {
         player.Draw();
 
         root.setOnKeyPressed(e -> {
-            System.out.println("key");
             if (e.getCode() == KeyCode.RIGHT) {
                 player.Shoot(Sprite.DIRECTION.RIGHT, enemies);
             } else if (e.getCode() == KeyCode.LEFT) {
@@ -49,38 +51,49 @@ public class MainGameScreen implements GameScreen {
             }
         });
 
+        // Score label
+        Text scoreLabel = new Text(30, 50, "");
+        scoreLabel.textProperty().bind(gameInfo.score.asString("Score: %d"));
+        scoreLabel.setFont(Font.font("Verdana", 32));
+        scoreLabel.setStyle("-fx-font-weight: bold");
+        scoreLabel.setFill(Color.WHITE);
+        root.getChildren().add(scoreLabel);
 
-//        AnimationTimer fireballTimer = new AnimationTimer() {
-//            final long now = System.nanoTime();
-//
-//            @Override
-//            public void handle(long l) {
-//                if (l - now < fireballLength * 1000 * 1000 * 1000) {
-//                    fireball.setTranslateX(fireball.getTranslateX() + fireballSpeed * direction);
-//                } else {
-//                    parent.getChildren().remove(fireball);
-//                }
-//
-//                System.out.println(fireball.getBoundsInParent());
-//
-//
-//            }
-//        };
+        // Enemies left label
+        Text enemyLabel = new Text(30, 90, "");
+        enemyLabel.textProperty().bind(gameInfo.enemiesLeft.asString("Enemies Left: %d"));
+        enemyLabel.setFont(Font.font("Verdana", 32));
+        enemyLabel.setStyle("-fx-font-weight: bold");
+        enemyLabel.setFill(Color.WHITE);
+        root.getChildren().add(enemyLabel);
 
+        // Heart container
+        gameInfo.heartContainer.setTranslateX(SC_WIDTH / 2 - (gameInfo.heartContainer.getBoundsInParent().getWidth() * 3) / 2);
+        gameInfo.heartContainer.setTranslateY(GAME_LANE_OFFSET - 30);
+        root.getChildren().add(gameInfo.heartContainer);
 
         AnimationTimer animationTimer = new AnimationTimer() {
             long lastEnemyCreatedTime = System.nanoTime();
-            int i = 0;
+            int enemiesToCreate = gameInfo.enemiesLeft.get();
 
             @Override
             public void handle(long l) {
 
-                // check for player-enemy collision
+                // moves enemies and check for player-enemy collision
                 for (Enemy enemy : enemies) {
+                    if (enemy.beingPushedBack) {
+                        continue;
+                    }
+
                     enemy.moveToCenter();
-//                    System.out.println(enemy);
+
                     if (player.collision(enemy)) {
-                        System.out.println("Player-enemy collision");
+                        enemy.pushBack();
+
+                        if (gameInfo.decreaseLife() == 0) {
+                            root.getChildren().add(new LoseGameScreen(gameInfo, SC_WIDTH, SC_HEIGHT, parent).getRoot());
+                            stop();
+                        }
                     }
                 }
 
@@ -89,9 +102,10 @@ public class MainGameScreen implements GameScreen {
                     Fireball fireball = it.next();
 
                     // check if fireball timed out
-                    if (l - fireball.createdTime > fireballLength * 1000 * 1000 * 1000) {
+                    if (l - fireball.createdTime > gameInfo.fireballLength * 1000 * 1000 * 1000) {
                         root.getChildren().remove(fireball.imgView);
                         it.remove();
+                        gameInfo.score.set(gameInfo.score.get() - 1);
                         continue;
                     }
 
@@ -102,18 +116,30 @@ public class MainGameScreen implements GameScreen {
                     // check for fireball-enemy collision
                     for (Iterator<Enemy> enemyIt = enemies.iterator(); enemyIt.hasNext();) {
                         Enemy enemy = enemyIt.next();
-                        if (enemy.collision(fireball.imgView.getBoundsInParent())) {
+
+                        // hit enemy
+                        if (enemy.collision(fireball.imgView.getBoundsInParent()) & !enemy.beingPushedBack) {
                             System.out.println("Fireball Collision");
                             root.getChildren().remove(enemy.imgView);
+                            root.getChildren().remove(enemy.boundingBox);
                             enemyIt.remove();
                             root.getChildren().remove(fireball.imgView);
                             it.remove();
+                            gameInfo.score.set(gameInfo.score.get() + 1);
+                            gameInfo.enemiesLeft.set(gameInfo.enemiesLeft.get() - 1);
                         }
+
+                        // check if beat level
+                        if (gameInfo.enemiesLeft.get() == 0) {
+                            System.out.println("Level won");
+                        }
+
+
                     }
                 }
 
                 // create new enemy
-                if ((l - lastEnemyCreatedTime) > enemyCreationSpeed * 1000 * 1000 * 1000 & enemies.size() < 2) {
+                if ((l - lastEnemyCreatedTime) > enemyCreationSpeed * 1000 * 1000 * 1000 & enemiesToCreate > 0) {
                     Sprite.DIRECTION dir = Sprite.DIRECTION.values()[new Random().nextInt(Sprite.DIRECTION.values().length)];
                     int enemyX;
                     if (dir == Sprite.DIRECTION.LEFT) {
@@ -122,11 +148,10 @@ public class MainGameScreen implements GameScreen {
                         enemyX = -300;
                     }
 
-                    Enemy enemy = new Enemy(enemySpeed, enemyX, GAME_LANE_OFFSET, dir, root);
+                    Enemy enemy = new Enemy(gameInfo.enemySpeed, enemyX, GAME_LANE_OFFSET + 20, dir, root);
                     enemies.add(enemy);
+                    enemiesToCreate -= 1;
                     lastEnemyCreatedTime = l;
-                    System.out.println("Created new enemy");
-                    i += 1;
                 }
 
 
@@ -134,8 +159,8 @@ public class MainGameScreen implements GameScreen {
             }
 
         };
-        animationTimer.start();
-
+//        animationTimer.start();
+        root.getChildren().add(new LoseGameScreen(gameInfo, SC_WIDTH, SC_HEIGHT, parent).getRoot());
 
 
 
