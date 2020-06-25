@@ -5,22 +5,15 @@ import javafx.scene.layout.HBox;
 
 public class GameInfo {
     SimpleIntegerProperty level = new SimpleIntegerProperty();
-    SimpleIntegerProperty lives = new SimpleIntegerProperty(3);
+    SimpleIntegerProperty lives = new SimpleIntegerProperty();
     SimpleIntegerProperty score = new SimpleIntegerProperty(0);
     SimpleIntegerProperty enemiesLeft = new SimpleIntegerProperty();
     double fireballLength;
     double enemySpeed;
     double enemyCreationSpeed;
-    HBox heartContainer = new HBox();
+    HBox heartContainer;
 
     public GameInfo(int level) {
-        for (int i = 0; i < 3; i++) {
-            ImageView heart = new ImageView(new Image("resources/img/fullheart.png"));
-            heart.setPreserveRatio(true);
-            heart.setFitHeight(40);
-            heartContainer.getChildren().add(heart);
-        }
-
         setLevel(level);
     }
 
@@ -40,6 +33,7 @@ public class GameInfo {
 
     private void levelOne() {
         level.set(1);
+        restoreLives();
         enemiesLeft.set(20);
         fireballLength = 2;
         enemySpeed = 2;
@@ -48,6 +42,7 @@ public class GameInfo {
 
     private void levelTwo() {
         level.set(2);
+        restoreLives();
         enemiesLeft.set(35);
         fireballLength = 1.5;
         enemySpeed = 3;
@@ -56,6 +51,7 @@ public class GameInfo {
 
     private void levelThree() {
         level.set(3);
+        restoreLives();
         enemiesLeft.set(60);
         fireballLength = 1;
         enemySpeed = 3.7;
@@ -71,5 +67,20 @@ public class GameInfo {
         ((ImageView) heartContainer.getChildren().get(lives.get())).setImage(new Image("resources/img/emptyheart.png"));
         return lives.get();
     }
+
+    private void restoreLives() {
+        lives.set(3);
+        HBox heartContainer = new HBox();
+
+        for (int i = 0; i < 3; i++) {
+            ImageView heart = new ImageView(new Image("resources/img/fullheart.png"));
+            heart.setPreserveRatio(true);
+            heart.setFitHeight(40);
+            heartContainer.getChildren().add(heart);
+        }
+
+        this.heartContainer = heartContainer;
+    }
+
 
 }

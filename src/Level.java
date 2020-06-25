@@ -9,6 +9,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+import javax.crypto.ExemptionMechanism;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
@@ -16,7 +17,6 @@ import java.util.Random;
 public class Level implements GameScreen {
     final MiniGame parent;
     ArrayList<Enemy> enemies = new ArrayList<Enemy>();
-    final double enemyCreationSpeed;
     final int fireballSpeed = 2;
     final int GAME_LANE_OFFSET = 300;
     Pane root = new Pane();
@@ -24,7 +24,6 @@ public class Level implements GameScreen {
     final SoundManager soundManager;
 
     public Level(int SC_WIDTH, int SC_HEIGHT, GameInfo gameInfo, SoundManager soundManager, MiniGame pnode) {
-        this.enemyCreationSpeed = gameInfo.enemyCreationSpeed;
         this.gameInfo = gameInfo;
         this.soundManager = soundManager;
         parent = pnode;
@@ -84,6 +83,7 @@ public class Level implements GameScreen {
         AnimationTimer animationTimer = new AnimationTimer() {
             long lastEnemyCreatedTime = System.nanoTime();
             int enemiesToCreate = gameInfo.enemiesLeft.get();
+            double timeToCreateNextEnemy = gameInfo.enemyCreationSpeed;
 
             @Override
             public void handle(long l) {
@@ -204,7 +204,7 @@ public class Level implements GameScreen {
                 }
 
                 // create new enemy
-                if ((l - lastEnemyCreatedTime) > enemyCreationSpeed * 1000 * 1000 * 1000 & enemiesToCreate > 0) {
+                if ((l - lastEnemyCreatedTime) > timeToCreateNextEnemy * 1000 * 1000 * 1000 & enemiesToCreate > 0) {
                     Sprite.DIRECTION dir = Sprite.DIRECTION.values()[new Random().nextInt(Sprite.DIRECTION.values().length)];
                     int enemyX;
                     if (dir == Sprite.DIRECTION.LEFT) {
@@ -217,6 +217,9 @@ public class Level implements GameScreen {
                     enemies.add(enemy);
                     enemiesToCreate -= 1;
                     lastEnemyCreatedTime = l;
+                    timeToCreateNextEnemy = gameInfo.enemyCreationSpeed + (gameInfo.enemyCreationSpeed * 0.3)
+                                                        * ((new Random().nextDouble() * 2) - 1);
+                    System.out.printf("Next creation time is %f", timeToCreateNextEnemy);
                 }
 
             }
