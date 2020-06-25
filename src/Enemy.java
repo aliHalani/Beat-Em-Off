@@ -14,7 +14,7 @@ public class Enemy extends Sprite {
     boolean beingPushedBack = false;
 
     public Enemy(double speed, int x, int y, DIRECTION dir, Pane parent) {
-        super("resources\\img\\enemy.png", speed, x, y, boundingBorderOffsetLeftX, boundingBorderOffsetRightX, dir, parent);
+        super("resources/img/enemy.png", speed, x, y, boundingBorderOffsetLeftX, boundingBorderOffsetRightX, dir, parent);
 
         if (dir == DIRECTION.RIGHT) {
             imgView.setScaleX(-1);

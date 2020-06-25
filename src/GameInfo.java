@@ -15,7 +15,7 @@ public class GameInfo {
 
     public GameInfo(int level) {
         for (int i = 0; i < 3; i++) {
-            ImageView heart = new ImageView(new Image("resources\\img\\fullheart.png"));
+            ImageView heart = new ImageView(new Image("resources/img/fullheart.png"));
             heart.setPreserveRatio(true);
             heart.setFitHeight(40);
             heartContainer.getChildren().add(heart);
@@ -68,7 +68,7 @@ public class GameInfo {
         }
         lives.set(lives.get() - 1);
 
-        ((ImageView) heartContainer.getChildren().get(lives.get())).setImage(new Image("resources\\img\\emptyheart.png"));
+        ((ImageView) heartContainer.getChildren().get(lives.get())).setImage(new Image("resources/img/emptyheart.png"));
         return lives.get();
     }
 

@@ -19,11 +19,11 @@ public class Player extends Sprite {
     static final int mouthYOffset = 155;
     static final double firingAnimationLength = 0.7 * 1000;
     ArrayList<Fireball> fireballs = new ArrayList<Fireball>();
-    BorderPane imgViewFire = new BorderPane(new ImageView(new Image("resources\\img\\fire.png")));
+    BorderPane imgViewFire = new BorderPane(new ImageView(new Image("resources/img/fire.png")));
     AtomicInteger currentlyFiring = new AtomicInteger(0);
 
     public Player(int x, int y, Pane parent) {
-        super("resources\\img\\idle.png", 0, x, y, boundingBorderOffsetLeftX, boundingBorderOffsetRightX, DIRECTION.LEFT, parent);
+        super("resources/img/idle.png", 0, x, y, boundingBorderOffsetLeftX, boundingBorderOffsetRightX, DIRECTION.LEFT, parent);
         imgViewFire.setOpacity(0);
         parent.getChildren().add(imgViewFire);
 

@@ -7,5 +7,5 @@ Windows 10.0.18363 (Intel CPU)
 - Used sound and image files distributed in-class. <br>
 
 Additional player hit sound effect obtained from https://www.zapsplat.com, usage under Standard Licence. <br>
-Addiotional background tracks, by Eric Matyas, obtained from https://soundimage.org.
+Additional background tracks, by Eric Matyas, obtained from https://soundimage.org.
 

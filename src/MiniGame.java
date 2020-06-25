@@ -32,7 +32,7 @@ public class MiniGame extends Application {
             stage.setWidth(SC_WIDTH);
             stage.setHeight(SC_HEIGHT);
 
-            Image image = new Image("resources\\img\\background2.png");
+            Image image = new Image("resources/img/background2.png");
             ImageView bgImg = new ImageView(image);
             root.getChildren().add(bgImg);
 

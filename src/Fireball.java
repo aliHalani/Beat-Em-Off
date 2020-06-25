@@ -8,7 +8,7 @@ public class Fireball {
 
     Fireball(long createdTime, Sprite.DIRECTION dir, double x, double y) {
         this.createdTime = createdTime;
-        this.imgView = new ImageView(new Image("resources\\img\\fireball2.gif"));
+        this.imgView = new ImageView(new Image("resources/img/fireball2.gif"));
         this.direction = dir;
 
         if (dir == Sprite.DIRECTION.RIGHT) {
