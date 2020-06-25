@@ -1,17 +1,16 @@
-import javafx.animation.Animation;
-import javafx.animation.FadeTransition;
-import javafx.animation.ScaleTransition;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
 import javafx.util.Duration;
@@ -26,15 +25,19 @@ public class TitleScreen implements GameScreen {
     final int titleFontSize = 56;
     final int controlYOffset = 85;
     final int controlFontSize = 32;
-    final Color titleBackgroundColour = Color.INDIANRED;
-    final Paint titleBackgroundBorderColour = Color.DARKRED;
+    Color titleBackgroundColour = Color.INDIANRED;
+    Paint titleBackgroundBorderColour = Color.DARKRED;
     static StackPane root;
     static Node titleBar;
     static Node controls;
     final MiniGame parent;
+    final SoundManager soundManager;
+    GameInfo gameInfo;
 
-    public TitleScreen(String gameTitle, int SC_WIDTH, int SC_HEIGHT, MiniGame pnode) {
-        parent = pnode;
+    public TitleScreen(String gameTitle, int SC_WIDTH, int SC_HEIGHT, GameInfo gameInfo, SoundManager soundManager, MiniGame pnode) {
+        this.soundManager = soundManager;
+        this.gameInfo = gameInfo;
+        this.parent = pnode;
 
         // set window properties
         root = new StackPane();
@@ -52,6 +55,12 @@ public class TitleScreen implements GameScreen {
         root.getChildren().add(controls);
         root.setAlignment(controls, Pos.BOTTOM_CENTER);
         root.setMargin(controls, new Insets(0,0,  controlYOffset, 0));
+
+        // add info to title screen
+        Node info = info();
+        root.getChildren().add(info);
+        root.setAlignment(info, Pos.TOP_LEFT);
+        root.setMargin(info, new Insets(titleYOffset - 10, 0, 0 , 20));
     }
 
     private Node titleBar (String gameTitle) {
@@ -128,11 +137,30 @@ public class TitleScreen implements GameScreen {
         return controlsWrapper;
     }
 
-    public void startGameTransition() {
+    private Node info() {
+        VBox hb = new VBox();
+
+        Text name = new Text("Ali Halani (athalani)");
+        name.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
+        name.setFill(Color.BLACK);
+        hb.getChildren().add(name);
+
+        Text studentNum = new Text("20621565");
+        studentNum.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
+        studentNum.setFill(Color.BLACK);
+        hb.getChildren().add(studentNum);
+
+        return new Group(hb);
+    }
+
+    public void startGameTransition(int level) {
         FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), root);
         fadeTransition.setFromValue(1);
         fadeTransition.setToValue(0);
-        fadeTransition.setOnFinished(parent.startGame());
+        fadeTransition.setOnFinished((e) -> {
+            parent.root.getChildren().remove(root);
+            parent.startGame(level, gameInfo);
+        });
 
         TranslateTransition titleTranslateTransition = new TranslateTransition(Duration.seconds(1.2), titleBar);
         titleTranslateTransition.setFromY(0);
@@ -142,17 +170,30 @@ public class TitleScreen implements GameScreen {
         controlsTranslateTransition.setFromY(0);
         controlsTranslateTransition.setToY(320);
 
-        fadeTransition.play();
-        titleTranslateTransition.play();
-        controlsTranslateTransition.play();
+        Timeline titleMusicFadeout = new Timeline(
+                new KeyFrame(Duration.seconds(1.5), new KeyValue(soundManager.titleMusic.volumeProperty(), 0))
+        );
+
+        ParallelTransition startTransmission = new ParallelTransition(fadeTransition,
+                titleTranslateTransition,
+                controlsTranslateTransition,
+                titleMusicFadeout);
+
+        startTransmission.play();
     }
 
     public Parent getRoot() {
         root.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ENTER) {
-                startGameTransition();
+                soundManager.stopTitleMusic();
                 root.setOnKeyPressed(null);
-            } else if (e.getCode() == KeyCode.E) {
+                startGameTransition(1);
+            } else if (e.getCode() == KeyCode.DIGIT1 || e.getCode() == KeyCode.DIGIT2 || e.getCode() == KeyCode.DIGIT3) {
+                soundManager.stopTitleMusic();
+                root.setOnKeyPressed(null);
+                startGameTransition(Character.getNumericValue(e.getCode().getCode()));
+            }
+            else if (e.getCode() == KeyCode.E) {
                 System.exit(0);
             }
         });

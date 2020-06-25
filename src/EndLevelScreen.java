@@ -1,11 +1,13 @@
 import javafx.animation.Animation;
 import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -15,8 +17,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
 import javafx.util.Duration;
 
-public class LoseGameScreen implements GameScreen {
-    final String gameTitle = "You lose";
+public class EndLevelScreen implements GameScreen {
     final int titlePadding = 30;
     final int titleYOffset = 30;
     final int titleBorderSize = 2;
@@ -24,20 +25,31 @@ public class LoseGameScreen implements GameScreen {
     final int titleBorderHeight = 25;
     final int titleFontSize = 56;
     final int scoreYOffset = 160;
-    final Color titleBackgroundColour = Color.INDIANRED;
-    final Paint titleBackgroundBorderColour = Color.DARKRED;
+    final int controlFontSize = 36;
+    final int controlYOffset = 130;
+    final Color titleBackgroundColour;
+    final Paint titleBackgroundBorderColour;
+    final String mainTitle;
+    final String controltext1;
     Pane root = new Pane();
     MiniGame parent;
 
-    LoseGameScreen(GameInfo gameInfo, int SC_WIDTH, int SC_HEIGHT, MiniGame parent) {
+    EndLevelScreen(GameInfo gameInfo, int SC_WIDTH, int SC_HEIGHT, Color titleBackgroundColour, Color titleBackgroundBorderColour, String title, String controlText1, MiniGame parent) {
+        this.titleBackgroundColour = titleBackgroundColour;
+        this.titleBackgroundBorderColour = titleBackgroundBorderColour;
+
+        this.mainTitle = title;
+        this.controltext1 = controlText1;
         this.parent = parent;
 
         root.setPrefWidth(SC_WIDTH);
         root.setPrefHeight(SC_HEIGHT);
         root.setFocusTraversable(true);
+        root.setTranslateY(-SC_HEIGHT);
 
         Rectangle backgroundRect = new Rectangle(SC_WIDTH, SC_HEIGHT, Color.BLACK);
         backgroundRect.setOpacity(0.65);
+        backgroundRect.setFocusTraversable(false);
         root.getChildren().add(backgroundRect);
 
         StackPane contentRoot = new StackPane();
@@ -45,9 +57,7 @@ public class LoseGameScreen implements GameScreen {
         contentRoot.setPrefHeight(SC_HEIGHT);
         root.getChildren().add(contentRoot);
 
-        gameInfo.score.set(35);
-
-        Node titleWrapper = titleBar("You lose");
+        Node titleWrapper = titleBar(title);
         contentRoot.getChildren().add(titleWrapper);
         contentRoot.setAlignment(titleWrapper, Pos.TOP_CENTER);
         contentRoot.setMargin(titleWrapper, new Insets(titleYOffset, 0, 0, 0));
@@ -57,12 +67,25 @@ public class LoseGameScreen implements GameScreen {
         contentRoot.setAlignment(scoreContent, Pos.CENTER);
         contentRoot.setMargin((scoreContent), new Insets(0, 0, scoreYOffset, 0));
 
+        Node controlContent = controls();
+        contentRoot.getChildren().add(controlContent);
+        contentRoot.setAlignment(controlContent, Pos.BOTTOM_CENTER);
+        contentRoot.setMargin(controlContent, new Insets(0, 0, controlYOffset, 0));
+
+        TranslateTransition tt = new TranslateTransition(Duration.seconds(1), root);
+        tt.setFromY(-SC_HEIGHT);
+        tt.setToY(0);
+        tt.play();
+    }
+
+    public EndLevelScreen(GameInfo gameInfo, int SC_WIDTH, int SC_HEIGHT, String title, String controlText1, MiniGame parent) {
+        this(gameInfo, SC_WIDTH, SC_HEIGHT, Color.INDIANRED, Color.DARKRED, title, controlText1, parent);
     }
 
     private Node titleBar(String contentTitle) {
         StackPane titlePane = new StackPane();
 
-        Text title = new Text(gameTitle);
+        Text title = new Text(this.mainTitle);
         title.setBoundsType(TextBoundsType.VISUAL);
         title.setFont(parent.getGameFont(titleFontSize));
         title.setFill(Color.WHITE);
@@ -85,7 +108,7 @@ public class LoseGameScreen implements GameScreen {
         root.setAlignment(Pos.CENTER);
 
         Text scoreLabel = new Text("Score");
-        scoreLabel.setFont(parent.getGameFont(36));
+        scoreLabel.setFont(parent.getGameFont(controlFontSize));
         scoreLabel.setFill(Color.WHITE);
         root.getChildren().add(scoreLabel);
 
@@ -102,30 +125,16 @@ public class LoseGameScreen implements GameScreen {
         VBox controlsPane = new VBox();
         controlsPane.setAlignment(Pos.CENTER);
 
-        Text controlLabel = new Text("Controls");
-        controlLabel.setFont(parent.getGameFont(controlFontSize));
-        controlLabel.setFill(Color.WHITE);
-        controlsPane.getChildren().add(controlLabel);
-
-        Text instructionLabel = new Text("Use the LEFT or RIGHT arrow keys to shoot");
-        instructionLabel.setFont(parent.getGameFont(18));
+        Text instructionLabel = new Text(controltext1);
+        instructionLabel.setFont(parent.getGameFont(controlFontSize - 6));
         instructionLabel.setFill(Color.WHITE);
-        instructionLabel.setSelectionStart(8);
-        instructionLabel.setSelectionEnd(22);
+        instructionLabel.setSelectionStart(6);
+        instructionLabel.setSelectionEnd(12);
         instructionLabel.setSelectionFill(Color.RED);
         controlsPane.getChildren().add(instructionLabel);
 
-        Text enterLabel = new Text("Press ENTER to start");
-        enterLabel.setFont(parent.getGameFont(24));
-        enterLabel.setFill(Color.WHITE);
-        controlsPane.getChildren().add(enterLabel);
-        controlsPane.setMargin(enterLabel, new Insets(50, 0, 0, 0));
-        enterLabel.setSelectionStart(6);
-        enterLabel.setSelectionEnd(11);
-        enterLabel.setSelectionFill(Color.RED);
-
         Text exitLabel = new Text("Press E to exit");
-        exitLabel.setFont(parent.getGameFont(24));
+        exitLabel.setFont(parent.getGameFont(controlFontSize - 6));
         exitLabel.setFill(Color.WHITE);
         exitLabel.setSelectionStart(6);
         exitLabel.setSelectionEnd(8);
