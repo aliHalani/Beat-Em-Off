@@ -219,7 +219,6 @@ public class Level implements GameScreen {
                     lastEnemyCreatedTime = l;
                     timeToCreateNextEnemy = gameInfo.enemyCreationSpeed + (gameInfo.enemyCreationSpeed * 0.3)
                                                         * ((new Random().nextDouble() * 2) - 1);
-                    System.out.printf("Next creation time is %f", timeToCreateNextEnemy);
                 }
 
             }

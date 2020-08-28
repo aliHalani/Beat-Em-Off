@@ -55,12 +55,6 @@ public class TitleScreen implements GameScreen {
         root.getChildren().add(controls);
         root.setAlignment(controls, Pos.BOTTOM_CENTER);
         root.setMargin(controls, new Insets(0,0,  controlYOffset, 0));
-
-        // add info to title screen
-        Node info = info();
-        root.getChildren().add(info);
-        root.setAlignment(info, Pos.TOP_LEFT);
-        root.setMargin(info, new Insets(titleYOffset - 10, 0, 0 , 20));
     }
 
     private Node titleBar (String gameTitle) {
@@ -135,22 +129,6 @@ public class TitleScreen implements GameScreen {
         scaleTransition.play();
 
         return controlsWrapper;
-    }
-
-    private Node info() {
-        VBox hb = new VBox();
-
-        Text name = new Text("Ali Halani (athalani)");
-        name.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
-        name.setFill(Color.BLACK);
-        hb.getChildren().add(name);
-
-        Text studentNum = new Text("20621565");
-        studentNum.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
-        studentNum.setFill(Color.BLACK);
-        hb.getChildren().add(studentNum);
-
-        return new Group(hb);
     }
 
     public void startGameTransition(int level) {
